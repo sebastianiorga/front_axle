@@ -108,7 +108,7 @@ module FrontAxle
             desc = order.match(/_desc$/)
             key = order.gsub(/_desc$/, '')
             s.sort do
-              by((klass.mapping.key?(("sort_#{key}").to_sym) ? "sort_#{key}" : key), desc ? 'desc' : ())
+              by((klass.mapping.key?(("sort_#{key}").to_sym) ? "sort_#{key}" : key), desc ? 'desc' : 'asc')
               by '_score'
             end
           end

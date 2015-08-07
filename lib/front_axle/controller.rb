@@ -63,7 +63,8 @@ module FrontAxle
           page = 1 if page < 1
 
           @results = klass.search(params[:q], page, params[:sort])
-          klass.search(params[:q], -1, params[:sort]).each do |p|
+
+          @results.each do |p|
             instance_exec(p, &options[:result_processor])
           end
           render :index, template: 'layouts/search'

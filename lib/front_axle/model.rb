@@ -109,7 +109,7 @@ module FrontAxle
             key = order.gsub(/_desc$/, '')
             s.sort do
               by((klass.mapping.key?(("sort_#{key}").to_sym) ? "sort_#{key}" : key), desc ? 'desc' : 'asc')
-              by '_score'
+              by '_score' if key != '_score'
             end
           end
           if page > 0

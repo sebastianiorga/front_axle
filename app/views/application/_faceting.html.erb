@@ -19,7 +19,7 @@ $("#stateflipper").click(function() {
 	var checked = {}; ul.find(":checked").map(function(x,y) { checked[$(y).val()] =1 })
 	ul.empty();
 	var addState = function(key,val) {
-		var input = $('<input type="checkbox" name="q[state][]"/>'); 
+		var input = $('<input type="checkbox" name="q[state][]"/>');
 		input.attr("value", val.name);
 		if (checked[val]) { input.prop("checked",true)}
 		label = $("<div class=\"facet-line\">"+val.name+' </li>');

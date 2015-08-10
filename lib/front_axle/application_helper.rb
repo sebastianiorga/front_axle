@@ -91,7 +91,9 @@ module FrontAxle
     end
 
     def slidey_facet_for(facet, params)
-      data = @results.facets[facet[:name]]
+      data = @results.response.facets[facet[:name]]
+
+      return '' if data.blank?
 
       if data['terms']
         data = data['terms'].sort { |a, b| a['term'] <=> b['term'] }

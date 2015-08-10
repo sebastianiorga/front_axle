@@ -29,15 +29,18 @@ module FrontAxle
     end
 
     def search_results(result, columns)
+
       out = ''.html_safe
       columns.each do |c|
         if c[:code]
           col_data = c[:code].call(result, self)
 
         elsif result.respond_to? c[:column]
-          col_data = result[c[:column]]
+          col_data = result.send c[:column].to_sym
         else
-          col_data = result.load
+          # col_data = result.load
+          binding.pry
+          col_data = nil
         end
         if col_data.class == Array
           col_data = content_tag('ul', col_data.map { |x| content_tag('li', x) }.join('').html_safe)
@@ -143,7 +146,7 @@ module FrontAxle
 
     # TODO: not actually doing anything to constrain search results
     def date_facet_for(facet, params)
-      data = @results.facets[facet[:name]]
+      data = @results.response.facets[facet[:name]]
 
       return if data.length == 0
 

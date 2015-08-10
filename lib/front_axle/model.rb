@@ -10,7 +10,7 @@ module FrontAxle
     INFINITY = 500_000
 
     module ClassMethods
-      def _search(params, page, order, query_block, facet_block, analyzer = 'synsnowball')
+      def _search(params, page, order, query_block, facet_hash, analyzer = 'synsnowball')
         klass = self
         page = 1 if page == 0 || !page
         # Elasticsearch.configure { logger 'elasticsearch-rails.log' }
@@ -28,14 +28,27 @@ module FrontAxle
               }
             # }
           }
-        f = {}
+        f = facet_hash
         if klass.const_defined? 'STRING_FACETS'
           klass::STRING_FACETS.each do |facet|
             t = Array(facet)[0]
-            size = Array(facet)[1] || 1000
+            # size = Array(facet)[1] || 1000
             f[t.to_sym] = { terms: { field: t.to_sym } }
           end
         end
+
+        if klass.const_defined? 'SLIDEY_FACETS'
+          klass::SLIDEY_FACETS.select { |f| !f[:i_will_facet] }.each do |facet|
+            f[facet[:name].to_sym] = { histogram: { field: facet[:name].to_sym, interval: facet[:interval] } }
+          end
+        end
+
+        if klass.const_defined? 'DATE_FACETS'
+          klass::DATE_FACETS.each do |facet|
+            f[facet[:name].to_sym] = { date_histogram: { field: facet[:name].to_sym, interval: facet.fetch(:interval) { 'month' } } }
+          end
+        end
+
         __elasticsearch__.search(query: q, facets: f).per_page(15).page(page)
 
 
@@ -74,14 +87,7 @@ module FrontAxle
         #           must { range f.to_s, from: min, to: max } if min.present? && max.present?
         #         end
         #       end
-        #       # TODO: initialize these constants as empty instead of dropping checks everywhere.
-        #       if klass.const_defined? 'STRING_FACETS'
-        #         klass::STRING_FACETS.each do |t|
-        #           must { terms t.to_s, params[t.to_s] } if params[t.to_s].present?
-        #         end
-        #       end
-        #     end
-        #     query_block.call(q) if query_block
+        #
         #   end
 
         #   if params['bounding_box'].present?
@@ -106,25 +112,6 @@ module FrontAxle
 
         #   facet_block.call(s) if facet_block
 
-        #   if klass.const_defined? 'STRING_FACETS'
-        #     klass::STRING_FACETS.each do |facet|
-        #       t = Array(facet)[0]
-        #       size = Array(facet)[1] || 1000
-        #       s.facet(t.to_s) { terms t.to_s, size: size }
-        #     end
-        #   end
-
-        #   if klass.const_defined? 'SLIDEY_FACETS'
-        #     klass::SLIDEY_FACETS.select { |f| !f[:i_will_facet] }.each do |f|
-        #       s.facet(f[:name].to_s) { histogram f[:name], interval: f[:interval] }
-        #     end
-        #   end
-
-        #   if klass.const_defined? 'DATE_FACETS'
-        #     klass::DATE_FACETS.each do |t|
-        #       s.facet(t[:name].to_s) { date t[:name], interval: t.fetch(:interval) { 'month' } }
-        #     end
-        #   end
 
         #   search_size = params[:per] || DEFAULT_SIZE
 

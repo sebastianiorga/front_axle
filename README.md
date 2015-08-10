@@ -90,7 +90,7 @@ provides a lot more functionality than just that.
 You will almost certainly want to customize the way that ElasticSearch indexes
 your models. See the tire and ElasticSearch documentation for what column
 types are available. You will certainly want to set up a mapping for your
-index, and you will probably also want to set up a  `to_indexed_json` method
+index, and you will probably also want to set up a  `as_indexed_json(_)` method
 in your model to ensure that the data is handled the way you want.
 
 ```ruby

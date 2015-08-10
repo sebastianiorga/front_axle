@@ -13,9 +13,9 @@ module FrontAxle
       def _search(params, page, order, query_block, facet_block, analyzer = 'synsnowball')
         klass = self
         page = 1 if page == 0 || !page
-        Tire.configure { logger 'elasticsearch-rails.log' }
+        # Elasticsearch.configure { logger 'elasticsearch-rails.log' }
 
-        tire.search do |s|
+        __elasticsearch__.search do |s|
           qqq = lambda do |q|
             q.boolean do
               if params['query'].present?

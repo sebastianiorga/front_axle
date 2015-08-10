@@ -33,7 +33,7 @@ module FrontAxle
       out = ''.html_safe
       columns.each do |c|
         if c[:code]
-          col_data = c[:code].call(result, self)
+          col_data = c[:code].call(result[:_source], self)
 
         elsif result.respond_to? c[:column]
           col_data = result.send c[:column].to_sym

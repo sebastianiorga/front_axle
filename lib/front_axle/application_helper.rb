@@ -39,7 +39,7 @@ module FrontAxle
           col_data = result.send c[:column].to_sym
         else
           # col_data = result.load
-          binding.pry
+          # binding.pry
           col_data = nil
         end
         if col_data.class == Array

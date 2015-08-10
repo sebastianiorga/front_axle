@@ -16,18 +16,76 @@ module FrontAxle
         # Elasticsearch.configure { logger 'elasticsearch-rails.log' }
 
         q = {}
-        q = {
-          # must: {
-            match: {
-              title: {
-                query: '*',
-                # analyzer: analyzer,
-                operator: 'AND',
-                zero_terms_query: "all"
-                }
+        # q = {
+        #   # must: {
+        #     match: {
+        #       Headline: {
+        #         query: '*',
+        #         # analyzer: analyzer,
+        #         operator: 'AND',
+        #         zero_terms_query: "all"
+        #         }
+        #       }
+        #     # }
+        #   }
+        if params['query'].present?
+          if analyzer.present?
+            query = {
+              must: [{
+                match: {
+                  _all: {
+                    query: params['query'],
+                    operator: 'AND',
+                    analyzer: analyzer
+                    }
+                  }
+                }]
               }
-            # }
-          }
+          else
+            query = {
+              must: [{
+                match: {
+                  _all: {
+                    query: params['query'],
+                    operator: 'AND'
+                    }
+                  }
+                }]
+              }
+          end
+        else
+          query = {
+              must: [{
+                match_all: {}
+              }]
+            }
+        end
+        q[:bool] = query
+        # must { range :updated_at, from: params['updated_since'] } if params['updated_since'].present?
+        # if klass.const_defined? 'SLIDEY_FACETS'
+        #   klass::SLIDEY_FACETS.select { |f| !f[:i_will_search] }.each do |f|
+        #     min = params["min#{f[:name]}"]
+        #     max = params["max#{f[:name]}"]
+        #     if min.present? && max.present?
+        #       if f[:type] == 'money'
+        #         max = max.to_f * 1_000_000
+        #         min = min.to_f * 1_000_000
+        #       end
+
+        #       must { range f[:name], from: min, to: max }
+        #     end
+        #   end
+        # end
+        # if klass.const_defined? 'DATE_FACETS'
+        #   klass::DATE_FACETS.each do |f|
+        #     min = params["min#{f}"]
+        #     max = params["max#{f}"]
+
+        #     must { range f.to_s, from: min, to: max } if min.present? && max.present?
+        #   end
+        # end
+
+
         f = facet_hash
         if klass.const_defined? 'STRING_FACETS'
           klass::STRING_FACETS.each do |facet|
@@ -47,6 +105,12 @@ module FrontAxle
           klass::DATE_FACETS.each do |facet|
             f[facet[:name].to_sym] = { date_histogram: { field: facet[:name].to_sym, interval: facet.fetch(:interval) { 'month' } } }
           end
+        end
+
+        if query_block.present?
+          customized_q = query_block.call(q)
+        else
+          customized_q = q
         end
 
         __elasticsearch__.search(query: q, facets: f).per_page(15).page(page)
@@ -87,7 +151,7 @@ module FrontAxle
         #           must { range f.to_s, from: min, to: max } if min.present? && max.present?
         #         end
         #       end
-        #
+
         #   end
 
         #   if params['bounding_box'].present?

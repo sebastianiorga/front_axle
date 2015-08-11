@@ -5,7 +5,7 @@
 <a class="close" data-dismiss="alert" href="#">&times;</a>
 <h4> <%= x.to_s.humanize %> </h4>
 
-<%= string_facet_for(x.to_s, @results, params) %>
+<%= string_facet_for(x.to_s, @results.response, params) %>
 
 <% # A horrible special case!
 if x.to_s === "state"

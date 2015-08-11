@@ -9,18 +9,20 @@
     var br = map.getBounds().getSouthEast();
     var tl = map.getBounds().getNorthWest();
       $.ajax({ url: "/<%= controller.controller_name %>.json",
-       data: { 
+       data: {
            search_id: <%= @search.id%>,
            bounds: [tl.lat,tl.lng,br.lat,br.lng].join(",")
        }, dataType: "json",
        success: function(data) {
-        while (m = markers.pop()) { map.removeLayer(m);}        
+        while (m = markers.pop()) { map.removeLayer(m);}
         data.forEach( function (x) {
-            var drop = L.icon({ 
-              iconUrl: "/icons/<%= controller.controller_name %>/"+x.iconPath+".svg",
-              iconSize: [30,40]
-            })    
-            markers.push(L.marker( x.location.reverse(), {icon:drop}).addTo(map).bindPopup("<a href=\"/<%= controller.controller_name%>/"+x.id+"\">"+x.name+"</a>"));
+          if (x.location) {
+              var drop = L.icon({
+                iconUrl: "/icons/<%= controller.controller_name %>/"+x.iconPath+".svg",
+                iconSize: [30,40]
+              })
+              markers.push(L.marker( x.location.reverse(), {icon:drop}).addTo(map).bindPopup("<a href=\"/<%= controller.controller_name%>/"+x.id+"\">"+x.name+"</a>"));
+            }
         })
 
     }})
@@ -56,7 +58,7 @@
       success: function(data) {
         if (data.success) {
           $("#q_location_lat").val(data.lat);
-          $("#q_location_lng").val(data.lng);          
+          $("#q_location_lng").val(data.lng);
           $("#location_wrapper").addClass("success");
         } else {
           $("#location_wrapper").removeClass("success");
@@ -66,7 +68,7 @@
     })
   });
 
-var showmap = function() { 
+var showmap = function() {
   $("#active_tab").val("map");
   map.invalidateSize(false);
   <% if @mapBounds && @mapBounds.min_point %>
@@ -75,7 +77,7 @@ var showmap = function() {
             [ <%= @mapBounds.max_point.latitude %>, <%= @mapBounds.max_point.longitude %> ]
         ]);
   <% else %>
-  map.fitBounds([[60, -154], [30, -69]]);  
+  map.fitBounds([[60, -154], [30, -69]]);
   <% end %>
   //redrawPoints();
 }

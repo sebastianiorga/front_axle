@@ -13,6 +13,8 @@ module FrontAxle
       def _search(params, page, order, query_block, facet_hash, analyzer = 'synsnowball')
         klass = self
         page = 1 if page == 0 || !page
+        per_page = params[:per_page]
+        per_page = 15 if params[:per_page].blank?
         # TODO: configure logger
         # Elasticsearch.configure { logger 'elasticsearch-rails.log' }
 
@@ -150,7 +152,7 @@ module FrontAxle
           s << '_score' if key != '_score'
         end
 
-        __elasticsearch__.search(query: q, facets: f, sort: s).per_page(15).page(page)
+        __elasticsearch__.search(query: q, facets: f, sort: s).per_page(per_page).page(page)
       end
     end
   end

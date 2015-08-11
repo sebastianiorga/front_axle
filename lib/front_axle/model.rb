@@ -151,10 +151,6 @@ module FrontAxle
         end
 
         __elasticsearch__.search(query: q, facets: f, sort: s).per_page(15).page(page)
-
-
-
-
       end
     end
   end

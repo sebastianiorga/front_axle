@@ -82,13 +82,6 @@ module FrontAxle
             q[:bool][:must] << { range: { f.to_sym => { gte: min, lte: max } } }
           end
         end
-        if klass.const_defined? 'STRING_FACETS'
-          klass::STRING_FACETS.each do |t|
-            next if params[t.to_s].blank?
-
-            q[:bool][:must] << { terms: { t.to_sym => params[t.to_s] } }
-          end
-        end
 
         # TODO: no maps in use for now
         # if params['bounding_box'].present?
@@ -110,7 +103,13 @@ module FrontAxle
         #  else
         #    s.query(&qqq)
         #  end
+        filters = { :and => { filters: [] } }
 
+        if klass.const_defined? 'STRING_FACETS'
+          klass::STRING_FACETS.each do |t|
+            potentially_nested_filters_for(t, filters, params)
+          end
+        end
         # FACETS
         f = facet_hash
         if klass.const_defined? 'STRING_FACETS'
@@ -152,7 +151,23 @@ module FrontAxle
           s << '_score' if key != '_score'
         end
 
-        __elasticsearch__.search(query: q, facets: f, sort: s).per_page(per_page).page(page)
+        __elasticsearch__.search(query: q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)
+      end
+
+      def potentially_nested_filters_for(t, filters, params)
+        return if params[t.to_s].blank?
+
+        if params[t.to_s].class == Array
+          filters[:and][:filters] << { terms: { t.to_sym => params[t.to_s] } }
+          return
+        end
+
+        nested_bool = { :or => { filters: [] } }
+        params[t.to_s].each do |k, v|
+          nested_bool[:or][:filters] << { terms: { k.to_sym => v } }
+        end
+
+        filters[:and][:filters] << nested_bool
       end
     end
   end

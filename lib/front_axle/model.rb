@@ -74,10 +74,10 @@ module FrontAxle
         end
         if klass.const_defined? 'DATE_FACETS'
           klass::DATE_FACETS.each do |f|
-            next unless min.present? && max.present?
-
             min = params["min#{f}"]
             max = params["max#{f}"]
+
+            next unless min.present? && max.present?
 
             q[:bool][:must] << { range: { f.to_sym => { gte: min, lte: max } } }
           end

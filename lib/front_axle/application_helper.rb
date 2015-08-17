@@ -23,6 +23,7 @@ module FrontAxle
 
         htmlclass += ' sorted-by' if c[:ordering] && sortcol.match(c[:ordering])
 
+        col = col.gsub('Technology', "Tech&#8203;nology").html_safe
         out += content_tag :th, col, class: htmlclass
       end
       out.html_safe

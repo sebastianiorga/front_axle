@@ -83,27 +83,16 @@ module FrontAxle
           end
         end
 
-        # TODO: no maps in use for now
-        # if params['bounding_box'].present?
-        #    s.query do |q|
-        #      q.filtered do
-        #        filter :geo_bounding_box, location: params['bounding_box']
-        #        query(&qqq)
-        #      end
-        #    end
-        #  elsif params['location_lat'].present? && params['distance'].present?
-        #    s.query do |q|
-        #      q.filtered do
-
-        #        filter :geo_distance, distance: params['distance'], distance_type: 'plane',
-        #                              location: [params['location_lng'], params['location_lat']]
-        #        query(&qqq)
-        #      end
-        #    end
-        #  else
-        #    s.query(&qqq)
-        #  end
         filters = { :and => { filters: [] } }
+
+        # TODO: no maps in use for now
+        if params['bounding_box'].present?
+          filters[:and][:filters] << { geo_bounding_box: { location: params['bounding_box'] }}
+        elsif params['location_lat'].present? && params['distance'].present?
+          filters[:and][:filters] << { geo_distance: { distance: params['distance'],
+                                                       distance_type: 'plane',
+                                                       location: [params['location_lng'], params['location_lat']] } }
+        end
 
         if klass.const_defined? 'STRING_FACETS'
           klass::STRING_FACETS.each do |t|

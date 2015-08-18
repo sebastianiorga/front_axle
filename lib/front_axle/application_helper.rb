@@ -107,7 +107,15 @@ module FrontAxle
 
       return if data.length == 0
 
-      width = facet[:width] || '5em'
+      from = 'From'
+      to = 'To'
+
+      if facet[:name].match('capacity')
+        from = 'Min'
+        to = 'Max'
+      end
+
+      width = facet[:width] || '4em'
 
       inputs = %w(min max).map do |l|
         name = l + facet[:name]
@@ -126,6 +134,8 @@ module FrontAxle
                                 class: 'controls'),
                     class: 'control-group')
       end.join('-')
+
+      inputs = "<label style='margin-right: 3px;'>#{from}</label>#{inputs}<label style='margin-left: 3px;'>#{to}</label>".html_safe
 
       tag = facet[:name]
       js_data = data.to_json.html_safe

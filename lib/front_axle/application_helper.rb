@@ -107,7 +107,7 @@ module FrontAxle
 
       return if data.length == 0
 
-      width = facet[:width] || '4em'
+      width = facet[:width] || '5em'
 
       inputs = %w(min max).map do |l|
         name = l + facet[:name]
@@ -115,7 +115,7 @@ module FrontAxle
         htmlclass = 'pseudo-disabled' unless params[:q][name].present?
 
         currency_sign_or_empty = (facet[:type] == 'money' ? '$' : '')
-        main_text = text_field_tag("q[#{name}]", params[:q][name], style: "width:#{width}", class: htmlclass)
+        main_text = number_field_tag("q[#{name}]", params[:q][name], style: "width:#{width}", class: htmlclass, min: 0, step: 1)
         money_type_or_empty = (facet[:type] == 'money' ? 'm' : '')
 
         text = "#{currency_sign_or_empty}#{main_text}#{money_type_or_empty}".html_safe

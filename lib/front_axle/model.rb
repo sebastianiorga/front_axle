@@ -10,7 +10,7 @@ module FrontAxle
     INFINITY = 500_000
 
     module ClassMethods
-      def _search(params, page, order, query_block, facet_hash, analyzer = 'synsnowball')
+      def _search(params, page, order, filter_block, query_block, facet_hash, analyzer = 'synsnowball')
         klass = self
         page = 1 if page == 0 || !page
         per_page = params[:per_page]
@@ -122,9 +122,15 @@ module FrontAxle
         end
 
         if query_block.present?
-          customized_q = query_block.call(q)
+          finalized_q = query_block.call(q)
         else
-          customized_q = q
+          finalized_q = q
+        end
+
+        if filter_block.present?
+          finalized_filters = filter_block.call(filters)
+        else
+          finalized_filters = filters
         end
 
         s = []
@@ -140,7 +146,7 @@ module FrontAxle
           s << '_score' if key != '_score'
         end
 
-        __elasticsearch__.search(query: q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)
+        __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: finalized_filters).per_page(per_page).page(page)
       end
 
       def potentially_nested_filters_for(t, filters, params)

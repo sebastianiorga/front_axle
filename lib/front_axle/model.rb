@@ -128,9 +128,7 @@ module FrontAxle
         end
 
         if filter_block.present?
-          finalized_filters = filter_block.call(filters)
-        else
-          finalized_filters = filters
+          filters[:and][:filters] << filter_block.call({})
         end
 
         s = []
@@ -146,7 +144,7 @@ module FrontAxle
           s << '_score' if key != '_score'
         end
 
-        __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: finalized_filters).per_page(per_page).page(page)
+        __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)
       end
 
       def potentially_nested_filters_for(t, filters, params)

@@ -83,13 +83,13 @@ module FrontAxle
           end
         end
 
-        filters = { :and => { filters: [] } }
+        filters = { :bool => { must: [] } }
 
         # TODO: no maps in use for now
         if params['bounding_box'].present?
-          filters[:and][:filters] << { geo_bounding_box: { location: params['bounding_box'] }}
+          filters[:bool][:must] << { geo_bounding_box: { location: params['bounding_box'] }}
         elsif params['location_lat'].present? && params['distance'].present?
-          filters[:and][:filters] << { geo_distance: { distance: params['distance'],
+          filters[:bool][:must] << { geo_distance: { distance: params['distance'],
                                                        distance_type: 'plane',
                                                        location: [params['location_lng'], params['location_lat']] } }
         end
@@ -128,7 +128,7 @@ module FrontAxle
         end
 
         if filter_block.present?
-          filters[:and][:filters] << filter_block.call({})
+          filters = filter_block.call(filters)
         end
 
         s = []
@@ -151,7 +151,7 @@ module FrontAxle
         return if params[t.to_s].blank?
 
         if params[t.to_s].class == Array
-          filters[:and][:filters] << { terms: { t.to_sym => params[t.to_s] } }
+          filters[:bool][:must] << { terms: { t.to_sym => params[t.to_s] } }
           return
         end
 
@@ -160,7 +160,7 @@ module FrontAxle
           nested_bool[:or][:filters] << { terms: { k.to_sym => v } }
         end
 
-        filters[:and][:filters] << nested_bool
+        filters[:bool][:must] << nested_bool
       end
     end
   end

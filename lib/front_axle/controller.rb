@@ -30,6 +30,8 @@ module FrontAxle
         params[:q] = {}
       end
 
+      params[:user_id] = current_user.try(:id)
+
       @search = Search.build(model_class, params)
       klass = model_class.constantize
       @display_columns = klass::DISPLAY_COLUMNS.dup

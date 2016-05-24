@@ -141,7 +141,7 @@ module FrontAxle
           key = props.key?(("sort_#{k}").to_sym) ? "sort_#{k}" : k
 
           s << { key => direction }
-          s << '_score' if key != '_score'
+          s << { 'id' => direction } if key != 'id'
         end
 
         __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)

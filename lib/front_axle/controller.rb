@@ -88,10 +88,10 @@ module FrontAxle
         end
         # TODO: some id columns are downloaded with their a href tag front-end cruft
         format.csv do
-          params[:q][:per] = 1000
-          params[:q][:per] = 2000 if current_user.role? 'admin'
+          # params[:q][:size] = 1_000_000
+          # params[:q][:size] = 2000 if current_user.role? 'admin'
 
-          @results = klass.search(params[:q], 1, params[:sort])
+          # @results = klass.search(params[:q], 1, params[:sort])
           @csv_columns = []
           @csv_columns = klass::CSV_COLUMNS.dup if klass.const_defined? 'CSV_COLUMNS'
 
@@ -105,13 +105,13 @@ module FrontAxle
           cols = @display_columns.select { |x| x[:column] != 'relevance' } # Horrible special case
           cols.push @csv_columns if @csv_columns
 
-          _export_as_csv(@results, cols)
+          _export_as_csv(params, cols, klass)
         end
       end
     end
 
-    def _export_as_csv(results, cols)
-      cols = cols.flatten.uniq_by { |c| c[:column] }
+    def _export_as_csv(params, cols, klass)
+      cols = cols.flatten.uniq { |c| c[:column] }
       header = cols.map { |c| c[:header] || c[:column].humanize }
       # not used
       # klass = model_class.constantize
@@ -122,25 +122,33 @@ module FrontAxle
       response.headers['Content-Transfer-Encoding'] = 'binary'
       response.headers['Last-Modified'] = Time.now.to_s
 
+
       self.response_body = CSV.generate do |y|
-        results.each_with_index do |result, i|
-          y << header if i == 0
+        y << header
+        params[:q][:per] = params[:q][:per_page] = 1000
+        results = klass.search(params[:q], 1, params[:sort])
+        total_pages = results.total_pages
 
-          line = []
-          cols.each do |c|
-            if c[:csvcode]
-              col_data = c[:csvcode].call(result, view_context)
-            elsif c[:code]
-              col_data = c[:code].call(result, view_context)
-            elsif result[c[:column]]
-              col_data = result[c[:column]]
+        (1..total_pages).each do |page|
+          results = klass.search(params[:q], page, params[:sort]) if page > 1
+
+          results.each do |result|
+            line = []
+            cols.each do |c|
+              if c[:csvcode]
+                col_data = c[:csvcode].call(result, view_context)
+              elsif c[:code]
+                col_data = c[:code].call(result, view_context)
+              elsif result.send(c[:column])
+                col_data = result.send(c[:column])
+              end
+              col_data = col_data.join(' // ') if col_data.class == Array
+
+              line.push ActionController::Base.helpers.strip_tags(col_data)
             end
-            col_data = col_data.join(' // ') if col_data.class == Array
 
-            line.push col_data
+            y << line
           end
-          y << line
-          GC.start if i % 500 == 0
         end
       end
     end

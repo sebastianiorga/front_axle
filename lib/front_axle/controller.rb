@@ -144,7 +144,7 @@ module FrontAxle
               end
               col_data = col_data.join(' // ') if col_data.class == Array
 
-              line.push ActionController::Base.helpers.strip_tags(col_data)
+              line.push ActionController::Base.helpers.strip_tags(col_data.to_s)
             end
 
             y << line

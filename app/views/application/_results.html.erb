@@ -8,7 +8,10 @@
 <% else %>
     <% if @results.count >0 and can? :edit, @results.first %>
     <div style="float:right">
-        <%= link_to('<i class="icon-download"></i> XLS'.html_safe, {:format => "csv",:search_id => @search.id}) %>
+        <%= link_to('<i class="icon-download"></i> CSV'.html_safe, {:format => "csv",:search_id => @search.id}) %>
+    </div>
+    <div style="float:right">
+        <%= link_to('<i class="icon-download"></i> XLSX'.html_safe, {:format => "XLSX",:search_id => @search.id}) %>
     </div>
     <% end %>
     <div class="resultcount"> <%= @results.results.total %> for all <%= things %> </div>

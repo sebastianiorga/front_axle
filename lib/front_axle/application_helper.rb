@@ -81,7 +81,7 @@ module FrontAxle
       @picked = []
       results.facets[f_name]['terms'].each do |t|
         item = []
-        item << (t['term'].present? ? t['term'].humanize : 'Not specified')
+        item << (t['term'].present? ? t['term'].to_s.humanize : 'Not specified')
         item[0] += " (#{t['count']})"
         item << t['term']
         @picked << t['term'] if param.try :member?, t['term']

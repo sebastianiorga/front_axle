@@ -107,7 +107,26 @@ module FrontAxle
 
           _export_as_csv(params, cols, klass)
         end
+
+        format.xlsx do
+          _export_as_xlsx
+        end
       end
+    end
+
+    def _export_as_xlsx
+      # results = klass.search(params[:q], 1, params[:sort])
+      #   total_pages = results.total_pages
+
+      #   (1..total_pages).each do |page|
+      #     results = klass.search(params[:q], page, params[:sort]) if page > 1
+
+      #     results.each do |result|
+      #       ...
+      #     end
+      #   end
+      # end
+      raise AbstractMethodError, 'Implement this method in your own controller.'
     end
 
     def _export_as_csv(params, cols, klass)
@@ -125,6 +144,7 @@ module FrontAxle
 
       self.response_body = CSV.generate do |y|
         y << header
+
         params[:q][:per] = params[:q][:per_page] = 1000
         results = klass.search(params[:q], 1, params[:sort])
         total_pages = results.total_pages

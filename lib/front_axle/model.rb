@@ -133,15 +133,21 @@ module FrontAxle
 
         s = []
         if order.present?
-          desc = order.match(/_desc$/)
-          direction = desc ? 'desc' : 'asc'
-          k = order.gsub(/_desc$/, '')
-          props = klass.mapping.to_hash.values.first[:properties]
+          order_params = order.is_a?(Array) ? order : order.split
 
-          key = props.key?(("sort_#{k}").to_sym) ? "sort_#{k}" : k
+          order_params.each do |order_param|
+            desc = order_param.match(/_desc$/)
+            direction = desc ? 'desc' : 'asc'
+            k = order_param.gsub(/_desc$/, '')
+            props = klass.mapping.to_hash.values.first[:properties]
 
-          s << { key => direction }
-          s << { 'id' => direction } if key != 'id'
+            key = props.key?(("sort_#{k}").to_sym) ? "sort_#{k}" : k
+
+            s << { key => direction }
+          end
+          if order_params.size == 1 && !s.map(&:keys).flatten.include?('id')
+            s << { 'id' => s.first.values.first }
+          end
         end
 
         __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)

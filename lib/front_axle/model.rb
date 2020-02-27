@@ -21,6 +21,11 @@ module FrontAxle
         # QUERY
         q = {}
 
+        # AGGREGATIONS
+        aggs = {}
+
+        aggs = params['aggs'] if params['aggs'].present?
+
         if params['query'].present?
           if analyzer.present?
             query = {
@@ -150,7 +155,7 @@ module FrontAxle
           end
         end
 
-        __elasticsearch__.search(query: finalized_q, facets: f, sort: s, filter: filters).per_page(per_page).page(page)
+        __elasticsearch__.search(query: finalized_q, aggs: aggs, facets: f, sort: s, filter: filters).per_page(per_page).page(page)
       end
 
       def potentially_nested_filters_for(t, filters, params)

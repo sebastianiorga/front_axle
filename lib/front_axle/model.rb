@@ -144,7 +144,7 @@ module FrontAxle
             desc = order_param.match(/_desc$/)
             direction = desc ? 'desc' : 'asc'
             k = order_param.gsub(/_desc$/, '')
-            props = klass.mapping.to_hash.values.first[:properties]
+            props = klass.mapping.to_hash.values.last
 
             key = props.key?(("sort_#{k}").to_sym) ? "sort_#{k}" : k
 
